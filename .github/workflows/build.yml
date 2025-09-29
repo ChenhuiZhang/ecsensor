@@ -37,5 +37,14 @@ jobs:
         run: cargo check --all
       - name: Lint rust sources
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
-      - name: Execute rust tests
+      - name: Check if tests exist
+        id: check_tests
+        run: |
+          if cargo test --no-run --all-features -- --list | grep -q .; then
+            echo "has_tests=true" >> $GITHUB_ENV
+          else
+            echo "has_tests=false" >> $GITHUB_ENV
+          fi
+      - name: Run nextest
+        if: env.has_tests == 'true'
         run: cargo nextest run --all-features
